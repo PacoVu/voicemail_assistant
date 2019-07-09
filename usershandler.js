@@ -82,7 +82,7 @@ var engine = User.prototype = {
     },
     loadMainPage: function(req, res){
       var extId = this.getExtensionId()
-      var query = "SELECT sub_id from users WHERE ext_id=" + extId
+      var query = "SELECT sub_id from vva_users WHERE ext_id=" + extId
       var thisUser = this
       pgdb.read(query, (err, result) => {
           if (!err){
@@ -240,7 +240,7 @@ var engine = User.prototype = {
                       thisUser.setUserName(fullName)
                       engine.readPhoneNumber(thisUser, callback, thisRes)
                       // create dbs
-                      thisUser.createTable("users", "users", function(err, res){
+                      thisUser.createTable("vva_users", "vva_users", function(err, res){
                         if (err)
                           console.log("create table failed")
                         thisUser.createTable("phonereputation", "phonereputation", function(err, res){
@@ -533,7 +533,8 @@ var engine = User.prototype = {
             else
                 fileName += body.id + ".wav"
             //item['contentUri'] = fileName
-            console.log("filename: " + fileName)
+            // don't need to write file for now. Consider to upload to AWS S3 bucket!
+            /*
             this.rc_platform.getPlatform(function(err, p){
             if (p != null){
                 var recordingUrl = p.createUrl(attachment.uri, {addToken: true});
@@ -551,6 +552,7 @@ var engine = User.prototype = {
                   })
                 }
             })
+            */
             break
           }
       }
@@ -994,7 +996,7 @@ function sortVoicemailUrgency(a, b) {
 }
 
 function storeAccessToken(thisUser, token){
-  var query = "INSERT INTO users (ext_id, access_token, sub_id, settings)"
+  var query = "INSERT INTO vva_users (ext_id, access_token, sub_id, settings)"
   query += " VALUES ($1, $2, $3, $4)"
   var values = [thisUser.getExtensionId(), token, "", JSON.stringify(thisUser.settings)]
   query += " ON CONFLICT (ext_id) DO UPDATE SET access_token = '" + token + "'"
@@ -1008,7 +1010,7 @@ function storeAccessToken(thisUser, token){
 }
 
 function loadSettings(thisUser){
-  var query = "SELECT settings FROM users WHERE ext_id=" + thisUser.getExtensionId()
+  var query = "SELECT settings FROM vva_users WHERE ext_id=" + thisUser.getExtensionId()
   pgdb.read(query, (err, result) => {
     if (err){
       console.error(err.message);
@@ -1027,7 +1029,7 @@ function loadSettings(thisUser){
 }
 
 function updateUserSettings(thisUser){
-  var query = "UPDATE users SET settings='" + JSON.stringify(thisUser.settings) + "' WHERE ext_id=" + thisUser.getExtensionId()
+  var query = "UPDATE vva_users SET settings='" + JSON.stringify(thisUser.settings) + "' WHERE ext_id=" + thisUser.getExtensionId()
   console.log("SETTINGS: " + query)
   pgdb.update(query, (err, result) =>  {
     if (err){

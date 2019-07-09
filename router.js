@@ -34,10 +34,10 @@ function getUserIndexByExtensionId(extId){
 
 var router = module.exports = {
   autoLogin: function(){
-    var query = "SELECT * FROM users"
+    var query = "SELECT * FROM vva_users"
     pgdb.read(query, (err, result) => {
         if (err){
-            console.log("cannot read users from db")
+            console.log("cannot read vva_users from db")
         }else{
           //console.log(JSON.stringify(result.rows[0]))
           async.each(result.rows,
@@ -118,7 +118,7 @@ var router = module.exports = {
       return this.forceLogin(req, res)
     }
     // reset token from db
-    var query = "UPDATE users SET access_token='' WHERE ext_id=" + req.session.extensionId
+    var query = "UPDATE vva_users SET access_token='' WHERE ext_id=" + req.session.extensionId
     pgdb.update(query, (err, result) => {
         if (err){
           console.error(err.message);
@@ -158,7 +158,7 @@ var router = module.exports = {
     var index = getUserIndex(req.session.userId)
     if (index < 0)
       return this.forceLogin(req, res)
-    var query = "SELECT sub_id from users WHERE ext_id=" + req.session.extensionId
+    var query = "SELECT sub_id from vva_users WHERE ext_id=" + req.session.extensionId
     pgdb.read(query, (err, result) => {
         var subscriptionId = ""
         if (!err && result.rows.length > 0){

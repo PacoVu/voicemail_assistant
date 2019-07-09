@@ -1,7 +1,7 @@
 const pgdb = require('./db')
 module.exports = {
     deleteSubscription: function(platform, extId, callback){
-      var query = "SELECT sub_id FROM users WHERE ext_id=" + extId
+      var query = "SELECT sub_id FROM vva_users WHERE ext_id=" + extId
       pgdb.read(query, (err, result) => {
           if (!err){
             var row = result.rows[0]
@@ -9,7 +9,7 @@ module.exports = {
               console.log(row['sub_id'])
               deleteSubscription(platform, row['sub_id'], function(err, result){
                 callback(null, true)
-                var query = "UPDATE users SET sub_id='' WHERE ext_id=" + extId
+                var query = "UPDATE vva_users SET sub_id='' WHERE ext_id=" + extId
                 console.log("UPDATE Sub Id: " + query)
                 pgdb.update(query, (err, result) => {
                   if (err){
@@ -49,7 +49,7 @@ function startWebhookSubscription(platform, extId, callback) {
           console.log("Ready to receive voicemail notification via WebHook.")
           var jsonObj = response.json();
           callback(null, jsonObj.id)
-          var query = "UPDATE users SET sub_id='" + jsonObj.id + "' WHERE ext_id=" + extId
+          var query = "UPDATE vva_users SET sub_id='" + jsonObj.id + "' WHERE ext_id=" + extId
           console.log("UPDATE Sub Id: " + query)
           pgdb.update(query, (err, result) => {
             if (err){
@@ -106,7 +106,7 @@ function checkRegisteredSubscription(platform, subscriptionId, callback) {
 /*
 function removeAllRegisteredSubscription(platform, extId) {
     console.log("removeAllRegisteredSubscription")
-    var query = "SELECT sub_id FROM users WHERE ext_id=" + extId
+    var query = "SELECT sub_id FROM vva_users WHERE ext_id=" + extId
     console.log(query)
     pgdb.read(query, (err, result) => {
         if (!err){
@@ -114,7 +114,7 @@ function removeAllRegisteredSubscription(platform, extId) {
           if (row['sub_id'] != ""){
             console.log(row['sub_id'])
             deleteSubscription(platform, row['sub_id'])
-            var query = "UPDATE users SET sub_id='' WHERE ext_id=" + extId
+            var query = "UPDATE vva_users SET sub_id='' WHERE ext_id=" + extId
             console.log("UPDATE Sub Id: " + query)
             pgdb.update(query, (err, result) => {
               if (err){

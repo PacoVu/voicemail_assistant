@@ -12,7 +12,7 @@ const pool = new Pool({
 
 module.exports = {
   create_table: (table, tableName, callback) => {
-    if (table == "users"){
+    if (table == "vva_users"){
       console.log("table: " + table)
       return pool.query(
         'CREATE TABLE IF NOT EXISTS ' + tableName + '(ext_id BIGINT PRIMARY KEY, access_token TEXT NOT NULL, sub_id VARCHAR(64) NOT NULL, settings TEXT)', callback);
