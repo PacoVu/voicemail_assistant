@@ -55,15 +55,14 @@ function readVoiceMail(){
   var getting = $.get( url );
   getting.done(function( res ) {
     if (res.status == "ok"){
+      voiceMailList = []
       if (res.voicemail.length){
-        voiceMailList = []
         for (var item of res.voicemail){
           voiceMailList.push(item)
         }
         sortedContentList()
       }
       listItems()
-      //categoryList = res.categoryList
     }
   });
 }
