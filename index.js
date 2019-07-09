@@ -44,17 +44,14 @@ app.get('/login', function (req, res) {
     req.session.userId = 0;
     if (!req.session.hasOwnProperty("extensionId"))
       req.session.extensionId = 0;
-  console.log("SESSION:" + JSON.stringify(req.session))
   router.loadLogin(req, res)
 })
 
 app.get('/logout', function (req, res) {
-  console.log('logout why here?')
   router.logout(req, res)
 })
 
 app.get('/loadmainpage', function (req, res) {
-  console.log('loadMainPage')
   if (req.session.extensionId != 0)
     router.loadMainPage(req, res)
   else{
@@ -63,11 +60,11 @@ app.get('/loadmainpage', function (req, res) {
 })
 
 app.get('/about', function (req, res) {
-  router.loadAboutPage(req, res)
+  //router.loadAboutPage(req, res)
+  res.render('about')
 })
 
 app.get('/oauth2callback', function(req, res){
-  console.log("callback redirected")
   router.login(req, res)
 })
 

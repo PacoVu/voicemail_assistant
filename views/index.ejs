@@ -15,31 +15,6 @@
         <link rel="stylesheet" type="text/css" href="./css/main.css">
         <link rel="stylesheet" type="text/css" href="./css/ui.css">
         <script src="./js/login.js"></script>
-        <!--script>
-          //var x = document.cookie;
-          var userId = getCookie("userId")
-          var extensionId = getCookie("extensionId")
-          //alert("userID: " + getCookie("userId"))
-          //alert("extensionID: " + getCookie("extensionId"))
-          if (userId != 0 && extensionId != 0){
-            window.location.href = "loadmainpage"
-          }
-          function getCookie(cname) {
-            var name = cname + "=";
-            var decodedCookie = decodeURIComponent(document.cookie);
-            var ca = decodedCookie.split(';');
-            for(var i = 0; i <ca.length; i++) {
-              var c = ca[i];
-              while (c.charAt(0) == ' ') {
-                c = c.substring(1);
-              }
-              if (c.indexOf(name) == 0) {
-                return c.substring(name.length, c.length);
-              }
-            }
-            return "";
-          }
-        </script-->
     </head>
     <body>
       <nav class="navbar navbar-default no-border">
@@ -48,7 +23,7 @@
           <span class="title">Voicemail Assistant</span>
         </span>
         <ul class="nav navbar-nav navbar-right middle-align">
-          <li><a href="/about">About</a></li>
+          <li><a href="/about">Help</a></li>
         </ul>
       </nav>
       <section id='content' style='margin-left:200px'>
@@ -67,13 +42,6 @@
             you can manually close the pop-up window and reload the page.</br>
           </p>
         </div>
-      </br></br>
-      <!--div class="row" style="width:500px">
-        <p>
-          <b>Don't have a RingCentral account?</b>
-          <button class='btn-rc' id="demoBtn" onclick="chooseEnvironment('demo')">Try It</button>
-        </p>
-      </div-->
       </section>
       <%- include('_footer') %>
     </body>
