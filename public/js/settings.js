@@ -10,6 +10,10 @@ function init(){
 function addAgent(){
     var agentId = $("#delegated_agents").val()
     var cat = $("#categories").val();
+    if (cat.length == 0){
+      $("#categories").focus()
+      return
+    }
     var agent = {
       id: agentId,
       name: $("#delegated_agents option:selected").text(),
@@ -37,7 +41,7 @@ function addAgent(){
 }
 
 function showMessageTemplate(){
-    enableSaveButton()
+    enableSaveButton(false)
     if ($("#send_confirm_sms").is(":checked"))
       $("#confirm_message").show()
     else
@@ -57,8 +61,7 @@ function saveSettings(){
   var getting = $.post( url, params );
   getting.done(function( res ) {
     if (res.status == "ok"){
-      //alert(res.message)
-      $("#save_btn").prop("disabled", true);
+      enableSaveButton(true)
     }else
       alert(res.message)
   });
@@ -68,8 +71,15 @@ function toggleTranscriptionOption(){
     $("#transcribe_spam_option").css("display", 'block');
   else
     $("#transcribe_spam_option").css("display", 'none');
-  enableSaveButton()
+  enableSaveButton(false)
 }
-function enableSaveButton(){
-  $("#save_btn").prop("disabled", false);
+
+function enableSaveButton(flag){
+  if (flag){
+    $("#save_btn").prop("disabled", true);
+    $("#cancel_btn").text("Done");
+  }else{
+    $("#save_btn").prop("disabled", false);
+    $("#cancel_btn").text("Cancel");
+  }
 }

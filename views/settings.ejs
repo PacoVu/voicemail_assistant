@@ -17,6 +17,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.3/js/bootstrap-select.min.js"></script>
     <script>
       window.selectedAgents = <%- JSON.stringify(settings['assigned_agents']) %>
+      window.thirdPartyTranscription = <%- JSON.stringify(settings['third_party_transcription']) %>
     </script>
 </head>
 <body onload="init()">
@@ -40,7 +41,7 @@
         <div class="col-sm-5">
             <div class="title">Transcription</div>
             <select id="transcription_option" style="width:150px" class="selectpicker filter-select" onchange="toggleTranscriptionOption()">
-              <% if (settings['third_party_transcription']) { %>
+              <% if (settings['third_party_transcription'] == "true") { %>
                 <option value="thirdparty" selected>Rev AI</option>
                 <option value="ringcentral">RingCentral</option>
               <% } else { %>
@@ -50,7 +51,7 @@
             </select>
             <% if (settings['third_party_transcription']) { %>
               <div id="transcribe_spam_option" style="display:block">
-              <% if (settings['transcribe_spam']) { %>
+              <% if (settings['transcribe_spam'] == "true") { %>
                 <input id="transcribe_spam" type="checkbox" checked onchange="enableSaveButton()"> Transcribe spam voicemail</input>
               <% } else { %>
                 <input id="transcribe_spam" type="checkbox" onchange="enableSaveButton()"> Transcribe spam voicemail</input>
@@ -103,7 +104,7 @@
             <% } %>
           </div>
           <div class="col-sm-2">
-            <button onclick="history.back()" class="btn">Cancel</button>&nbsp;&nbsp;
+            <button id="cancel_btn" onclick="history.back()" class="btn">Cancel</button>&nbsp;&nbsp;
             <button id="save_btn" disabled onclick="saveSettings()" class="btn-rc">Save</button>
           </div>
         <div class="col-sm-1"></div>
