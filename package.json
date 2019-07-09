@@ -1,0 +1,33 @@
+{
+  "name": "Virtual Voicemail Assistant",
+  "version": "1.0.0",
+  "description": "Demo of a virtual assistant which listens for new voicemail and assign to an agent based on skill set.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ringcentral",
+    "voicemail",
+    "data analysis",
+    "AI"
+  ],
+  "author": "Paco-Vu",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^2.6.1",
+    "body-parser": "^1.17.2",
+    "dotenv": "^4.0.0",
+    "ejs": "^2.5.6",
+    "express": "^4.15.3",
+    "express-session": "^1.16.1",
+    "monkeylearn": "^3.2.1",
+    "pg": "^7.10.0",
+    "request": "^2.88.0",
+    "rev_ai": "^0.5.1",
+    "ringcentral": "^3.1.1"
+  },
+  "engines": {
+    "node": "8.1.2"
+  }
+}
