@@ -300,7 +300,7 @@ var engine = User.prototype = {
                   var count = jsonObj.records.length
                   for (var record of jsonObj.records){
                       if (record.usageType == "DirectNumber"){
-                        if (record.type == "VoiceFax"){
+                        if (record.type != "FaxOnly"){
                           for (var feature of record.features){
                             if (feature == "SmsSender" || feature == "InternationalSmsSender"){
                               thisUser.phoneNumbers.push(record.phoneNumber)
@@ -309,7 +309,7 @@ var engine = User.prototype = {
                           }
                         }
                       }else if (record.usageType == "CompanyNumber"){
-                        if (record.type == "VoiceFax")
+                        if (record.type != "FaxOnly")
                             thisUser.companyNumbers.push(record.phoneNumber)
                       }
                     }
@@ -661,6 +661,70 @@ var engine = User.prototype = {
         message: "Added"
       }
       res.send(response)
+    },
+    updatePhoneSource: function(req, res){
+      if (req.body.source == "spam"){
+        var reputation_details = {
+          score: 0,
+          type: null,
+          category: "Spam"
+          }
+        var reputation = {
+            reputation_level: 3,
+            volume_score: 0,
+            report_count: 1,
+            reputation_details: reputation_details
+          }
+        number_analysis.addPhoneReputation(req.body.phone_number, reputation)
+        var response = {
+          status: "ok",
+          message: "Added"
+        }
+        res.send(response)
+      }else{
+        var customerTable = "customer_"+this.getExtensionId()
+        var vmTable = "voicemail_"+this.getExtensionId()
+        var q = "SELECT count(*) FROM " + customerTable
+        pgdb.read(q, function(err, result) {
+          var count = parseInt(result.rows[0].count)
+          var value = [count+1, req.body.firstName,req.body.lastName,req.body.phone_number, "mobile"]
+          var query = "INSERT INTO " + customerTable + " (customer_id, first_name, last_name, phone_number, phone_number_type)"
+          query += " VALUES ($1, $2, $3, $4, $5)"
+          query += " ON CONFLICT (customer_id) DO NOTHING"
+          console.log(query)
+          pgdb.insert(query, value, (err, result) =>  {
+              if (err){
+                console.error(err.message);
+              }
+              console.log("customer added" + result)
+              var name = req.body.firstName + " " + req.body.lastName
+              var phone_info = {
+                reputation_level: 1,
+                reputation_details: {
+                  score: 1,
+                  type: null,
+                  category: "Customer"
+                },
+                volume_score: 1,
+                report_count:1,
+                phone_number: req.body.phone_number
+              }
+              query = "UPDATE " + vmTable + " SET phone_info='" + JSON.stringify(phone_info) + "', from_name='" + name + "', from_number='" + req.body.phone_number + "', number_type='mobile' WHERE vm_id=" + req.body.id
+              console.log(query)
+              pgdb.update(query, (err, result) =>  {
+                if (err){
+                  console.error(err.message);
+                }
+                console.log("update customer: " + result)
+                var response = {
+                  status: "ok",
+                  message: "Added"
+                }
+                res.send(response)
+              })
+          })
+        })
+      }
     },
     transcribeVoicemail: function(item){
       var thisUser = this

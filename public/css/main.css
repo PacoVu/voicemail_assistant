@@ -141,6 +141,11 @@ audio
 .info {
   margin-left: 20px;
 }
+
+.dialog-field{
+    min-width: 130px;
+    margin-top: 10px;;
+}
 #button_header {
   margin-bottom: 10px;
 }

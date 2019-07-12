@@ -121,8 +121,14 @@ module.exports = {
 function storePhoneReputation(phoneNumber, item){
   var query = "INSERT INTO phonereputation VALUES ($1, $2, $3, $4, $5, $6, $7)"
   var timestamp = new Date().getTime()
-  var values = [phoneNumber, item.reputation_level, item.reputation_details.score, item.reputation_details.type, item.reputation_details.category, timestamp]
-  query += " ON CONFLICT DO NOTHING"
+  var values = [phoneNumber, item.reputation_level, item.reputation_details.score, item.reputation_details.type, item.reputation_details.category, item.report_count, timestamp]
+  query += " ON CONFLICT (phone_number) DO UPDATE SET"
+  query += " reputation_level='" + item.reputation_level + "'"
+  query += ", reputation_score='" + item.reputation_details.score + "'"
+  query += ", reputation_type='" + item.reputation_details.type + "'"
+  query += ", reputation_category='" + item.reputation_details.category + "'"
+  query += ", report_count='" + item.report_count + "'"
+  console.log(values)
   pgdb.insert(query, values, (err, result) =>  {
     if (err){
       console.error(err.message);

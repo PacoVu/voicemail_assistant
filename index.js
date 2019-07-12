@@ -102,6 +102,10 @@ app.post('/sendsms', function (req, res) {
   router.sendSmsMessage(req, res)
 })
 
+app.post('/updatephonesource', function (req, res) {
+  router.updatePhoneSource(req, res)
+})
+
 app.get('/settings', function (req, res) {
   router.loadSettingsPage(req, res)
 })

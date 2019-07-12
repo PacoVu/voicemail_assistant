@@ -60,6 +60,28 @@
     </form>
   </div>
 
+  <div id="hidden-div-change-source" style="display : none">
+    <form id="change_source_form">
+      <div class="form-group">
+        <label for="old_source" class="control-label">Current source:</label>
+        <span id="old_source"></spam>
+      </div>
+      <div class="form-group">
+        <label for="new_source" class="control-label dialog-field">Select new source:</label>
+        <select class="selectpicker filter-select" id="new_type" onchange="toggleCustomerInfoForm()">
+          <option value="customer">Customer</option>
+          <option value="spam">Spam</option>
+        </select>
+        <div id="customer_info" style="display: block">
+          <label for="first_name" class="control-label dialog-field">First name:</label>
+          <input type="text" id="first_name" value=""</input></br>
+          <label for="last_name" class="control-label dialog-field">Last name:</label>
+          <input type="text" id="last_name" value=""</input>
+        </div>
+      </div>
+    </form>
+  </div>
+
   <nav id="menu_header" class="navbar navbar-default no-border">
     <span class="left-middle-align">
       <span class="rclogo"><a href="/"><img alt="Brand" src="img/ringcentral.png" height="40"></a></span>&nbsp;&nbsp;

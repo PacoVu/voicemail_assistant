@@ -137,20 +137,32 @@ function addRow(item){
   row.append(td)
 
   // Source
-  var phoneType = "Unknown"
+  var source = "Unknown"
   if (item.spam.hasOwnProperty('reputation_details'))
     if (item.spam.reputation_details.category != undefined)
-      phoneType = item.spam.reputation_details.category
+      source = item.spam.reputation_details.category
 
   td = $("<td>", {
     class: "td-active"
     });
-  td.click( function() {
-     window.location.href = createOpenItemLink(item)
-  });
-  cell = $("<span>", {
-    text: phoneType,
+
+  if (source == "Unknown"){
+    var text = "<span>" + source + "</span> <img height='10px' src='./img/edit.png'></img>"
+    cell = $("<div>")
+    cell.html(text)
+    td.append(cell)
+    td.click( function() {
+        changeSource(item, source)
     });
+  }else{
+    td.click( function() {
+       window.location.href = createOpenItemLink(item)
+    });
+    cell = $("<span>", {
+      text: source,
+    });
+  }
+
   td.append(cell)
   row.append(td)
 
@@ -346,6 +358,36 @@ function submitChangeCategory(item, newCat){
   return true
 }
 
+function changeSource(item, source){
+  var message = $('#change_source_form');
+  $("#old_source").html(source)
+  BootstrapDialog.show({
+      title: 'Change source',
+      message: $('#change_source_form'),
+      onhide : function(dialog) {
+        $('#hidden-div-change-source').append(message);
+      },
+      buttons: [{
+        label: 'Close',
+        action: function(dialog) {
+          dialog.close();
+        }
+      }, {
+        label: 'Submit Change',
+        cssClass: 'btn btn-primary',
+        action: function(dialog) {
+          var newSource = $("#new_type").val()
+          if (newSource == ""){
+            $("#new_type").focus()
+            return
+          }
+          if (submitChangeSource(item, newSource))
+            dialog.close();
+        }
+      }]
+  });
+}
+
 function changeAgent(item){
   var message = $('#change_agent_form');
   $("#old_agent").html(item.assigned)
@@ -374,6 +416,43 @@ function changeAgent(item){
         }
       }]
   });
+}
+
+function submitChangeSource(item, newSource){
+  var url = "updatephonesource"
+  var params = {
+    id: item.id,
+    phone_number: item.fromNumber,
+    source: newSource
+  }
+  if (newSource == "customer"){
+    params['firstName'] = $("#first_name").val()
+    params['lastName'] = $("#last_name").val()
+  }
+  var posting = $.post( url, params );
+  posting.done(function( res ) {
+    if (res.status == "ok"){
+      for (var i=0; i<voiceMailList.length; i++){
+        if (voiceMailList[i].id == item.id){
+          if (newSource == "customer"){
+            voiceMailList[i].fromName = $("#first_name").val() + " " + $("#last_name").val()
+            voiceMailList[i].spam.reputation_details['category'] = "Customer"
+          }
+          listItems()
+          break
+        }
+      }
+    }else
+      alert(res.message)
+  });
+  return true
+}
+
+function toggleCustomerInfoForm(){
+  if ($("#new_type").val() == "customer")
+    $("#customer_info").show()
+  else
+    $("#customer_info").hide()
 }
 
 function submitChangeAgent(item, newAgent){
