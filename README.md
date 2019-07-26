@@ -1,5 +1,5 @@
 ## Try it
-[https://voicemail-assistant.herokuapp.com](Voicemail Assistant)
+https://voicemail-assistant.herokuapp.com
 
 ## Clone and Setup
 ```
