@@ -248,6 +248,9 @@ var engine = User.prototype = {
                             console.log('phonereputation table created failed');
                           else
                             console.log("phonereputation table created")
+                            number_analysis.createDemoPhoneReputation(function(err, result){
+                                console.log("demo spam number created: " + result)
+                            })
                           thisUser.createTable("customer", "customer_"+extensionId, function(err, res){
                             if (err)
                               console.log('customers table created failed');
