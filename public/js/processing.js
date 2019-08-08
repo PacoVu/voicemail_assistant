@@ -4,7 +4,7 @@ var assend = false
 var sortedByUrgency = false
 
 function reportSpam(number){
-  alert(number)
+  //alert(number)
   var url = "markspam?number=" + number
   var getting = $.get( url );
   getting.done(function( res ) {
@@ -54,7 +54,7 @@ function sendSMS(){
     var posting = $.post( url, params );
     posting.done(function( resp ) {
         if (resp.status == "ok") {
-            
+
         }
     });
     posting.fail(function(response){

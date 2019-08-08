@@ -228,6 +228,21 @@ function addRow(item){
   td.append(cell)
   row.append(td)
 
+  // Age
+  var now = Date.now();
+  var gap = formatVoicemailAge((now - item.date)/1000)
+  td = $("<td>", {
+    class: "td-active",
+    align: "left"
+    });
+
+  cell = $("<span>", {
+    text: gap,
+  });
+
+  td.append(cell)
+  row.append(td)
+
   // listen
   td = $("<td>", {
     class: "td-active"
@@ -304,6 +319,27 @@ function addRow(item){
   });
   */
   $("#voicemail_items").append(row)
+}
+
+function formatVoicemailAge(dur){
+  var duration = ""
+  if (dur > 3600){
+    var h = Math.floor(dur / 3600)
+    dur = dur % 3600
+    var m = Math.floor(dur / 60)
+    m = (m>9) ? m : ("0" + m)
+    dur = dur % 60
+    var s = (dur>9) ? dur : ("0" + dur)
+    return h + ":" + m + ":" + Math.floor(s)
+  }else if (dur > 60){
+    var m = Math.floor(dur / 60)
+    dur %= 60
+    var s = (dur>9) ? dur : ("0" + dur)
+    return m + ":00" + Math.floor(s)
+  }else{
+    var s = (dur>9) ? dur : ("0" + dur)
+    return "0:" + Math.floor(s)
+  }
 }
 
 function changeCategory(item){
