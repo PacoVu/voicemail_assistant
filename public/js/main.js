@@ -38,12 +38,12 @@ function pollResult(){
         }
         updateVoicemailList()
       }else{
-        //content = "no voicemail"
+        updateVoicemailAge()
       }
       window.setTimeout(function(){
         if (canPoll)
           pollResult()
-      }, 2000)
+      }, 5000)
     }else{
 
     }
@@ -89,11 +89,12 @@ function logout(){
 
 function addRow(item){
   var row = $("<tr>", {
+    id: item.id,
     class: "tr-active"
   })
   var td = $("<td>", {
     });
-  var sId = item['id']
+
   var cell = $("<input>", {
     id: "sel_" + item.id,
     name: item.id,
@@ -232,6 +233,7 @@ function addRow(item){
   var now = Date.now();
   var gap = formatVoicemailAge((now - item.date)/1000)
   td = $("<td>", {
+    id: "age_" + item.id,
     class: "td-active",
     align: "left"
     });
@@ -322,23 +324,46 @@ function addRow(item){
 }
 
 function formatVoicemailAge(dur){
-  var duration = ""
-  if (dur > 3600){
+  if (dur > 86400) {
+    var d = Math.floor(dur / 86400)
+    dur = dur % 86400
     var h = Math.floor(dur / 3600)
     dur = dur % 3600
     var m = Math.floor(dur / 60)
     m = (m>9) ? m : ("0" + m)
-    dur = dur % 60
-    var s = (dur>9) ? dur : ("0" + dur)
-    return h + ":" + m + ":" + Math.floor(s)
-  }else if (dur > 60){
+    //dur = dur % 60
+    //var s = (dur>9) ? dur : ("0" + dur)
+    return d + "d" + h + "h" + m + "m" //+ Math.floor(s)
+  }else if (dur >= 3600){
+    var h = Math.floor(dur / 3600)
+    dur = dur % 3600
     var m = Math.floor(dur / 60)
-    dur %= 60
-    var s = (dur>9) ? dur : ("0" + dur)
-    return m + ":00" + Math.floor(s)
+    m = (m>9) ? m : ("0" + m)
+    //dur = dur % 60
+    //var s = (dur>9) ? dur : ("0" + dur)
+    return h + "h" + m + "m"//+ ":" + Math.floor(s)
+  }else if (dur >= 60){
+    var m = Math.floor(dur / 60)
+    //dur %= 60
+    //var s = (dur>9) ? dur : ("0" + dur)
+    return m + "m" //+ Math.floor(s)
   }else{
     var s = (dur>9) ? dur : ("0" + dur)
-    return "0:" + Math.floor(s)
+    return Math.floor(s) + "s"
+  }
+}
+
+function updateVoicemailAge(){
+  for (var item of voiceMailList){
+    //
+    var now = Date.now();
+    var gap = formatVoicemailAge((now - item.date)/1000)
+    var td = $("#age_" + item.id)
+    var cell = $("<span>", {
+      text: gap,
+    });
+    td.html(cell)
+    //alert(gap)
   }
 }
 
