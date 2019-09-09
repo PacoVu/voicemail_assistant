@@ -80,8 +80,7 @@ app.post('/webhookcallback', function(req, res) {
         }).on('end', function() {
             body = Buffer.concat(body).toString();
             var jsonObj = JSON.parse(body)
-            if (jsonObj.event.indexOf('/voicemail') > -1)
-              router.processVoicemailNotification(jsonObj.body, jsonObj.ownerId, jsonObj.subscriptionId)
+            router.processVoicemailNotification(jsonObj.body, jsonObj.ownerId, jsonObj.subscriptionId)
         });
     }
 })

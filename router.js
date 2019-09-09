@@ -253,15 +253,15 @@ var router = module.exports = {
       return this.forceLogin(req, res)
     users[index].pollForVoiceMail(res)
   },
-  processVoicemailNotification: function(body, extensionId, subscriptionId){
-    var index = getUserIndexByExtensionId(extensionId)
-    if (index < 0)
-      return
-    if (users[index].getSubscriptionId() == subscriptionId)
-      users[index].processVoicemailNotification(body)
-    else
-      console.log("not my subscription")
-  },
+    processVoicemailNotification: function(body, extensionId, subscriptionId){
+      var index = getUserIndexByExtensionId(extensionId)
+      if (index < 0)
+        return
+      if (users[index].getSubscriptionId() == subscriptionId)
+        users[index].processVoicemailNotification(body)
+      else
+        console.log("not my subscription")
+    },
   setProcessed: function(req, res){
     var index = getUserIndex(req.session.userId)
     if (index < 0)

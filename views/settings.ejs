@@ -52,27 +52,27 @@
             <% if (settings['third_party_transcription']) { %>
               <div id="transcribe_spam_option" style="display:block">
               <% if (settings['transcribe_spam'] == "true") { %>
-                <input id="transcribe_spam" type="checkbox" checked onchange="enableSaveButton()"> Transcribe spam voicemail</input>
+                <input id="transcribe_spam" type="checkbox" checked onchange="disableSaveButton(false)"> Transcribe spam voicemail</input>
               <% } else { %>
-                <input id="transcribe_spam" type="checkbox" onchange="enableSaveButton()"> Transcribe spam voicemail</input>
+                <input id="transcribe_spam" type="checkbox" onchange="disableSaveButton(false)"> Transcribe spam voicemail</input>
               <% } %>
               </div>
             <% } else { %>
               <div id="transcribe_spam_option" style="display:none">
               <% if (settings['transcribe_spam']) { %>
-                <input id="transcribe_spam" type="checkbox" checked onchange="enableSaveButton()"> Transcribe spam voicemail</input>
+                <input id="transcribe_spam" type="checkbox" checked onchange="disableSaveButton(false)"> Transcribe spam voicemail</input>
               <% } else { %>
-                <input id="transcribe_spam" type="checkbox" onchange="enableSaveButton()"> Transcribe spam voicemail</input>
+                <input id="transcribe_spam" type="checkbox" onchange="disableSaveButton(false)"> Transcribe spam voicemail</input>
               <% } %>
               </div>
             <% } %>
             <div class="title">Auto-reply</div>
             <% if (settings['send_confirm_sms']) { %>
               <input type="checkbox" id="send_confirm_sms" class="section" checked onclick="showMessageTemplate()"> Send reply SMS message to caller</input></br>
-              <textarea id="confirm_message" class="message_template" onchange="enableSaveButton()" cols="51" rows="3" placeholder="Enter SMS message template"><%= settings['message'] %></textarea>
+              <textarea id="confirm_message" class="message_template" onchange="disableSaveButton(false)" cols="51" rows="3" placeholder="Enter SMS message template"><%= settings['message'] %></textarea>
             <% } else { %>
               <input type="checkbox" id="send_confirm_sms" class="section" onclick="showMessageTemplate()"> Send reply SMS message to caller</input></br>
-              <textarea id="confirm_message" style="display:none" class="message_template" onchange="enableSaveButton()" cols="51" rows="3" placeholder="Enter SMS message template"><%= settings['message'] %></textarea>
+              <textarea id="confirm_message" style="display:none" class="message_template" onchange="disableSaveButton(false)" cols="51" rows="3" placeholder="Enter SMS message template"><%= settings['message'] %></textarea>
             <% } %>
 
             </br>

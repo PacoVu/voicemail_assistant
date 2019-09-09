@@ -2,9 +2,9 @@ var revai = require('rev_ai')
 var revai_client = new revai.REVAIClient(process.env.REVAI_APIKEY, "v1", null)
 
 module.exports = {
-    transcribe: function(recordingUrl, callback){
+    transcribe: function(voicemailUrl, callback){
       var params = {
-        media_url: encodeURI(recordingUrl),
+        media_url: encodeURI(voicemailUrl),
         skip_diarization: "true",
         metadata: "This is a test"
       }

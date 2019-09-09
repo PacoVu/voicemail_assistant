@@ -1,7 +1,7 @@
 const MonkeyLearn = require('monkeylearn')
 const ml = new MonkeyLearn(process.env.MONKEYLEARN_APIKEY)
 let urgency_model_id = 'cl_Aiu8dfYF'
-let support_model_id = 'cl_zBbUZ6dU'
+let categorization_model_id = 'cl_zBbUZ6dU'
 
 
 module.exports = {
@@ -27,7 +27,7 @@ module.exports = {
   },
   classifyCategory: function(transcript, callback){
     let data = [transcript]
-    ml.classifiers.classify(support_model_id, data).then(res => {
+    ml.classifiers.classify(categorization_model_id, data).then(res => {
         var body = res.body[0]
         var result = null
         if (body.error == false){
@@ -49,6 +49,3 @@ module.exports = {
     })
   }
 }
-
-var topicSample = []
-// "I was billed twice for the service and this is the second time it has happened. Can you please look into this matter right away?"

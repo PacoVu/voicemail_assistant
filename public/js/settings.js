@@ -38,10 +38,11 @@ function addAgent(){
         select += agent.name + ": " + agent.category + "</br>"
     }
     $("#selected").html(select)
+    disableSaveButton(false)
 }
 
 function showMessageTemplate(){
-    enableSaveButton(false)
+    disableSaveButton(false)
     if ($("#send_confirm_sms").is(":checked"))
       $("#confirm_message").show()
     else
@@ -61,7 +62,7 @@ function saveSettings(){
   var getting = $.post( url, params );
   getting.done(function( res ) {
     if (res.status == "ok"){
-      enableSaveButton(true)
+      disableSaveButton(true)
     }else
       alert(res.message)
   });
@@ -71,10 +72,10 @@ function toggleTranscriptionOption(){
     $("#transcribe_spam_option").css("display", 'block');
   else
     $("#transcribe_spam_option").css("display", 'none');
-  enableSaveButton(false)
+  disableSaveButton(false)
 }
 
-function enableSaveButton(flag){
+function disableSaveButton(flag){
   if (flag){
     $("#save_btn").prop("disabled", true);
     $("#cancel_btn").text("Done");
