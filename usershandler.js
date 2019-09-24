@@ -800,7 +800,7 @@
         }
       }
       // identify category and assign to relevant agent
-      content_analysis.classifyCategory(transcript, function(err, result){
+      content_analysis.classifyCategory(item.transcript, function(err, result){
         if (result){
           item['categories'] = result.category
           var agentName = "Unassigned"
@@ -812,8 +812,8 @@
                 item['assigned'] = agent.name
                 thisUser.addSupportCaseToAgentDB(table, item)
                 if (item.status == "Urgent" && item.confidence > 6){
-                  var text = "You have an urgent callback request from " + item['fromNumber']  + "\n"
-                  text += (item['transcript'].length < 150) ? item['transcript'] : item['transcript'].substr(0, 150)
+                  var text = "You have an urgent callback request from " + item.fromNumber  + "\n"
+                  text += (item.transcript.length < 150) ? item.transcript : item.transcript.substr(0, 150)
                   notifyAgentBySmsMessage(thisUser, agent.id, text)
                 }else{
                   console.log("Not urgent. No need to alert an agent")
