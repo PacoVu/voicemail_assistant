@@ -72,11 +72,13 @@ var router = module.exports = {
       users.push(user)
       var p = user.getPlatform()
       if (p != null){
+        var authorize_uri = p.loginUrl({
+          brandId: process.env.RINGCENTRAL_BRAND_ID,
+          redirectUri: process.env.RC_APP_REDIRECT_URL
+        })
+        console.log(authorize_uri)
         res.render('login', {
-          authorize_uri: p.loginUrl({
-            brandId: process.env.RINGCENTRAL_BRAND_ID,
-            redirectUri: process.env.RC_APP_REDIRECT_URL
-          }),
+          authorize_uri: authorize_uri,
           redirect_uri: process.env.RC_APP_REDIRECT_URL,
           token_json: ''
         });

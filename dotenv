@@ -12,6 +12,7 @@ RC_CLIENT_ID_PROD=YourProductionAppClientId
 RC_CLIENT_SECRET_PROD=YourProductionAppClientSecret
 
 RC_APP_REDIRECT_URL=http://localhost:8080/oauth2callback
+DELIVERY_MODE_ADDRESS=
 
 MONKEYLEARN_APIKEY=Your_Api_Key
 REVAI_APIKEY=Your_Api_Key
