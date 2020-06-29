@@ -5,7 +5,7 @@
   const pgdb = require('./db')
 
   const transcriptionist = require('./transcription_engine')
-  var number_analysis = require('./number_analysis_telesign')
+  var number_analysis = require('./number_analysis')
   var content_analysis = require('./content_analysis')
   const RCPlatform = require('./platform.js')
   require('dotenv').load()
@@ -101,6 +101,12 @@
     },
     loadSettingsPage: function(req, res){
       var settings = this.settings
+      /*
+      settings['transcribe_spam'] = this.settings.transcribe_spam
+      settings['send_confirm_sms'] = this.settings.send_confirm_sms
+      settings['sms_template'] = this.settings.message
+      settings['assigned_agents'] = this.settings.assigned_agents
+      */
       var thisUser = this
       this.rc_platform.getPlatform(function(err, p){
         if (p != null){
@@ -192,19 +198,15 @@
                       }
                     }
                   }
-                  table = "customer_" + extId
-                  thisUser.readCustomerInfo(table, req.query.phoneNumber, (err, result) => {
-                    res.render('processitem', {
-                      userName: thisUser.getUserName(),
-                      phoneNumber: thisUser.phoneNumbers[0],
-                      customerInfo: result,
-                      userId: req.session.userId,
-                      extensionId: req.session.extensionId,
-                      callInfo: row,
-                      missedCalls: missedCalls,
-                      connectedCalls: connectedCalls,
-                      voicemail: voicemail
-                    })
+                  res.render('processitem', {
+                    userName: thisUser.getUserName(),
+                    phoneNumber: thisUser.phoneNumbers[0],
+                    userId: req.session.userId,
+                    extensionId: req.session.extensionId,
+                    callInfo: row,
+                    missedCalls: missedCalls,
+                    connectedCalls: connectedCalls,
+                    voicemail: voicemail
                   })
                 })
               }else{
@@ -214,28 +216,6 @@
           }
         }
       });
-    },
-    readCustomerInfo: function(customerTable, phoneNumber, callback){
-      phoneNumber = phoneNumber.replace("+","").trim()
-      var query = "SELECT email, address, ssn FROM " + customerTable + " WHERE phone_number='" + phoneNumber +"'"
-      pgdb.read(query, (err, result) => {
-        response = {}
-        if (err){
-          response['customer'] = false
-          callback(null, response)
-        }else{
-          if (result.rows.length > 0){
-            response['customer'] = true
-            response['email'] = result.rows[0].email
-            response['address'] = result.rows[0].address
-            response['ssn'] = "XXX-XX-" + result.rows[0].ssn.substr(5, 9)
-            callback(null, response)
-          }else{
-            response['customer'] = false
-            callback(null, response)
-          }
-        }
-      })
     },
     login: function(req, res, callback){
       var thisReq = req
@@ -278,9 +258,9 @@
                         console.log("customers table created")
                         thisUser.createTable("voicemail", "voicemail_"+extensionId, function(err, res){
                           if (err)
-                          console.log('voicemail table created failed');
+                            console.log('voicemail table created failed');
                           else
-                          console.log("voicemail table created")
+                            console.log("voicemail table created")
                           addFakeCustomersData("customer_"+extensionId)
                         })
                       })
@@ -381,7 +361,7 @@
         }else{
           if (result.rows.length > 0){
             for (var row of result.rows){
-              var reputation = unescape(row['phone_number_info'])
+              var spam = unescape(row['phone_info'])
               var item = {
                 id: row['vm_id'],
                 event_type: row['event_type'],
@@ -398,7 +378,7 @@
                 categories: row['categories'],
                 processed: row['processed'],
                 assigned: row['assigned'],
-                reputation: JSON.parse(reputation)
+                spam: JSON.parse(spam)
               }
               response.voicemail.push(item)
             }
@@ -409,17 +389,15 @@
     },
     saveSettings: function(req, res){
       console.log("save settings")
-      this.settings.third_party_transcription = req.body.third_party_transcription
-      this.settings.transcribe_spam = req.body.transcribe_spam
-      this.settings.send_confirm_sms = req.body.send_confirm_sms
+      this.settings.third_party_transcription = (req.body.third_party_transcription == "true")
+      this.settings.transcribe_spam = (req.body.transcribe_spam == "true")
+      this.settings.send_confirm_sms = (req.body.send_confirm_sms == "true")
       this.settings.message = req.body.message
       this.settings.assigned_agents = JSON.parse(req.body.assigned_agents)
       updateUserSettings(this)
       res.send({"status":"ok","message":"saved"})
     },
     updateAgent: function(req, res){
-      console.log("updateAgent")
-      console.log(req.body.agent)
       var tableName = "voicemail_" + this.getExtensionId()
       var query = "UPDATE " + tableName + " SET assigned='" + req.body.agent + "' WHERE vm_id=" + req.body.id
       pgdb.update(query, (err, result) =>  {
@@ -440,6 +418,23 @@
         }else
         res.send({"status": "ok", "message":"Category changed"})
       })
+      /*
+      var query = "SELECT manager_id FROM " + tableName + " WHERE vm_id=" + req.body.id
+      console.log("updateCategory: " + query)
+      pgdb.read(query, (err, result) => {
+      if (!err){
+      var row = result.rows[0]
+      tableName = "voicemail_" + row['manager_id']
+      var query = "UPDATE " + tableName + " SET categories='" + req.body.category + "' WHERE vm_id=" + req.body.id
+      pgdb.update(query, (err, result) =>  {
+      if (err){
+      console.error(err.message);
+    }
+    console.log("save settings: " + result)
+  })
+  }
+  })
+  */
   },
   setProcessed: function(req, res){
     var tableName = "voicemail_" + this.getExtensionId()
@@ -497,7 +492,7 @@
       this.newData = false
       var item = {}
       item['event_type'] = "VoiceMail"
-      //console.log(JSON.stringify(body))
+
       if (body.from.hasOwnProperty("phoneNumber")){
         item['fromNumber'] = body.from.phoneNumber
         if (body.from.hasOwnProperty('name'))
@@ -506,7 +501,7 @@
         item['fromName'] = "Unknown"
       }else{ // For demo purpose, if "from.phoneNumber" is missing, use predefined spam numbers
         if (index >= samplePhoneNumber.length)
-        index = 0
+          index = 0
         item['fromNumber'] = samplePhoneNumber[index]
         item['fromName'] = "Unknown"
         index++
@@ -560,7 +555,8 @@
           console.log("Dont need to detect scam. Call transcription")
           item['fromName'] = result.fullName
           item['numberType'] =result.number_type
-          item['reputation'] = makeCustomerNumberReputationObject()
+          item['spam'] = makeCustomerNumberReputationObject()
+          console.log(thisUser.settings.third_party_transcription)
           if (thisUser.settings.third_party_transcription){
             thisUser.transcribeVoicemail(item)
           }else{ // use RC transcription
@@ -573,11 +569,11 @@
                 if (err){
                   console.log("cannot detect phone reputation")
                 }else{
-                  if (result['score'] > 651 && thisUser.settings.transcribe_spam == false){
+                  if (result['reputation_level'] > 1 && thisUser.settings.transcribe_spam == false){
                     console.log("Scam! Don't waste money to do transcription or to detect urgency.")
                     item['transcript'] = "N/A"
                     item['categories'] = "N/A"
-                    item['reputation'] = result
+                    item['spam'] = result
                     item['status'] = "NotUrgent"
                     item['confidence'] = 0
                     item['assigned'] = "Unassigned"
@@ -585,7 +581,7 @@
                     thisUser.newData = true
                     thisUser.addVoicemailToDB("voicemail_"+thisUser.getExtensionId(), item)
                   }else{
-                    item['reputation'] = result
+                    item['spam'] = result
                     console.log("use 3rd party transcription service")
                     if (thisUser.settings.third_party_transcription){
                       thisUser.transcribeVoicemail(item)
@@ -596,11 +592,11 @@
                 }
               })
             }else{
-              if (result['score'] > 651 && thisUser.settings.transcribe_spam == false){
+              if (result['reputation_level'] > 1 && thisUser.settings.transcribe_spam == false){
                 console.log("Scam! Don't waste money to do transcription or to detect urgency.")
                 item['transcript'] = "N/A"
                 item['categories'] = "N/A"
-                item['reputation'] = result
+                item['spam'] = result
                 item['status'] = "NotUrgent"
                 item['confidence'] = 0
                 item['assigned'] = "Unassigned"
@@ -608,7 +604,7 @@
                 thisUser.newData = true
                 thisUser.addVoicemailToDB("voicemail_"+thisUser.getExtensionId(), item)
               }else{
-                item['reputation'] = result
+                item['spam'] = result
                 console.log("use 3rd party transcription service")
                 if (thisUser.settings.third_party_transcription){
                   thisUser.transcribeVoicemail(item)
@@ -637,11 +633,16 @@
     })
   },
   updatePhoneReputationDB: function(req, res){
+    var reputation_details = {
+      score: 0,
+      type: null,
+      category: "Scam"
+    }
     var reputation = {
-      level: "high",
-      score: 900,
-      recommendation: "block",
-      source: "Spam"
+      reputation_level: 4,
+      volume_score: 0,
+      report_count: 1,
+      reputation_details: reputation_details
     }
     number_analysis.addPhoneReputation(req.query.number, reputation)
     var response = {
@@ -651,12 +652,17 @@
     res.send(response)
   },
   updatePhoneSource: function(req, res){
-    if (req.body.source == "Spam"){
+    if (req.body.source == "spam"){
+      var reputation_details = {
+        score: 0,
+        type: null,
+        category: "Spam"
+      }
       var reputation = {
-        level: "high",
-        score: 900,
-        recommendation: "block",
-        source: "Spam"
+        reputation_level: 3,
+        volume_score: 0,
+        report_count: 1,
+        reputation_details: reputation_details
       }
       number_analysis.addPhoneReputation(req.body.phone_number, reputation)
       var response = {
@@ -681,13 +687,18 @@
           }
           console.log("customer added" + result)
           var name = req.body.firstName + " " + req.body.lastName
-          var phone_number_info = {
-            level: "Clean",
-            score: 0,
-            recommendation: "allow",
-            source: "Customer"
-            }
-          query = "UPDATE " + vmTable + " SET phone_number_info='" + JSON.stringify(phone_number_info) + "', from_name='" + name + "', from_number='" + req.body.phone_number + "', number_type='mobile' WHERE vm_id=" + req.body.id
+          var phone_info = {
+            reputation_level: 1,
+            reputation_details: {
+              score: 1,
+              type: null,
+              category: "Customer"
+            },
+            volume_score: 1,
+            report_count:1,
+            phone_number: req.body.phone_number
+          }
+          query = "UPDATE " + vmTable + " SET phone_info='" + JSON.stringify(phone_info) + "', from_name='" + name + "', from_number='" + req.body.phone_number + "', number_type='mobile' WHERE vm_id=" + req.body.id
           console.log(query)
           pgdb.update(query, (err, result) =>  {
             if (err){
@@ -715,7 +726,7 @@
           }else{
             var wordArr = transcript.split(" ")
             item['transcript'] = transcript
-            if (wordArr.length > 10 && item.reputation.score < 401){
+            if (wordArr.length > 10 && item.spam.reputation_level == 1){
               thisUser.analyzeVoicemail(item)
             } else { // no transcription or message is too short
               item['status'] = 'NotUrgent'
@@ -746,7 +757,7 @@
               var transcript =  buffer.toString()
               item['transcript'] = transcript
               var wordArr = transcript.split(" ")
-              if (wordArr.length > 10 && item.reputation.score < 401){
+              if (wordArr.length > 10 && item.spam.reputation_level == 1){
                 thisUser.analyzeVoicemail(item)
               } else { // no transcription or message is too short
                 item['status'] = 'NotUrgent'
@@ -883,9 +894,8 @@
     })
   },
   addVoicemailToDB: function (tableName, item){
-    console.log(JSON.stringify(item.reputation))
     var query = "INSERT INTO " + tableName + " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)"
-    var values = [item.id, item.date, item.fromNumber, item.fromName, item.numberType, item.toNumber, item.toName, item.contentUri, item.duration, item.transcript, item.status, item.confidence, JSON.stringify(item.reputation), false, item.event_type, item.categories, item.assigned]
+    var values = [item.id, item.date, item.fromNumber, item.fromName, item.numberType, item.toNumber, item.toName, item.contentUri, item.duration, item.transcript, item.status, item.confidence, escape(JSON.stringify(item.spam)), false, item.event_type, item.categories, item.assigned]
     query += " ON CONFLICT DO NOTHING"
     console.log("voicemail: " + query)
     pgdb.insert(query, values, (err, result) =>  {
@@ -920,11 +930,16 @@
   }
 
   function makeCustomerNumberReputationObject(){
-    var reputation = {
-      level: "Clean",
+    var reputation_details = {
       score: 0,
-      recommendation: "allow",
-      source: "Customer"
+      type: null,
+      category: "Customer"
+    }
+    var reputation = {
+      reputation_level: 1,
+      volume_score: 0,
+      report_count: 0,
+      reputation_details: reputation_details
     }
     return reputation
   }
@@ -1049,36 +1064,46 @@
   }
 
   function updateUserSettings(thisUser){
-    var settings = JSON.stringify(thisUser.settings).replace("'", "''")
-    console.log(settings)
-    var query = "UPDATE vva_users SET settings='" + settings + "' WHERE ext_id=" + thisUser.getExtensionId()
+    var query = "UPDATE vva_users SET settings='" + JSON.stringify(thisUser.settings) + "' WHERE ext_id=" + thisUser.getExtensionId()
+    console.log("SETTINGS: " + query)
     pgdb.update(query, (err, result) =>  {
       if (err){
         console.error(err.message);
       }
-      console.log("settings updated")
+      console.log("save settings: " + result)
     })
   }
   // create test customer db
   function addFakeCustomersData(table){
+    /*
     var data = [
-      [1,	"Smith","Brown","19165464387","landline","smith.brown@gmail.com", "206 E Washington Ave. Sunnyvale CA-94087", "174238712", 1],
-      [2,	"James","Bond","16502245476","mobile","james.bond@yahoo.com", "902 Whisman Road. Mountain View CA-94043", "434431752", 1],
-      [3,	"Daniel","Cuello","17242680235","landline","dcuello@gmail.com", "1 Simpson Dr. San Jose CA-95123", "003417893", 4],
-      [4,	"Martin","Cooper","16504281183","landline","martin.cooper@gmail.com", "334 California Ave. San Francisco CA-92134", "803562056", 1],
-      [5,	"Mike","Mahony","4085942101","landline","mike.mahony@gmail.com", "23 Embacadero Blvd. San Francisco CA-2134", "123938444", 3],
-      [6, "Francisco","Rincon","16505130930", "mobile","francisco.rincon@gmail.com", "76 5th Ave. New York NY-11111", "143553290", 2],
-      [7, "Anna","Madisson","19165464387", "mobile","anna.madisson@gmail.com", "134 George Ave. Cambridge MA-31354", "424050356", 5]
+      [2,	"Smith","Brown","+19165464387","landline"],
+      [1,	"James","Bond","+16502245476","mobile"],
+      [3,	"Daniel","Cuello","+17242680235","landline"],
+      [4,	"Martin","Cooper","+16504281183","landline"],
+      [5,	"Mike","Mahony","4085942101","landline"],
+      [6, "Francisco","Alcon","+16505130930", "mobile"],
+      [7, "Anna","Madisson","+19165464387", "mobile"]
     ]
-
+    */
+    var data = [
+      [2,	"Smith","Brown","+19165464387","landline"],
+      [1,	"James","Bond","+13129828160","mobile"],
+      [3,	"Daniel","Cuello","+17242680235","landline"],
+      [4,	"Martin","Cooper","+16504281183","landline"],
+      [5,	"Mike","Mahony","4085942101","landline"],
+      [6, "Francisco","Alcon","+16505130930", "mobile"],
+      [7, "Anna","Madisson","+19165464387", "mobile"]
+    ]
     for (var values of data){
-      var query = "INSERT INTO " + table + " (customer_id, first_name, last_name, phone_number, phone_number_type, email, address, ssn, level)"
-      query += " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
+      var query = "INSERT INTO " + table + " (customer_id, first_name, last_name, phone_number, phone_number_type)"
+      query += " VALUES ($1, $2, $3, $4, $5)"
       query += " ON CONFLICT (customer_id) DO NOTHING"
       pgdb.insert(query, values, (err, result) =>  {
         if (err){
           console.error(err.message);
         }
+        console.log("customer added" + result)
       })
     }
   }

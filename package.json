@@ -25,7 +25,8 @@
     "pg": "^7.10.0",
     "request": "^2.88.0",
     "rev_ai": "^0.5.1",
-    "ringcentral": "^3.1.1"
+    "ringcentral": "^3.1.1",
+    "telesignsdk": "^2.2.1"
   },
   "engines": {
     "node": "8.1.2"

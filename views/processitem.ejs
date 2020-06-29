@@ -64,9 +64,14 @@
           <div>Name: <%= callInfo.from_name %></div>
           <div>Phone Number: <a href="rcmobile://call?number=<%-callInfo.from_number%>"><%= callInfo.from_number %></a></div>
           <br/>
-          <% var spam = JSON.parse(unescape(callInfo.phone_info)) %>
-          <% if (spam.reputation_details.category == "Unknown") { %>
+          <% var spam = JSON.parse(unescape(callInfo.phone_number_info)) %>
+          <% if (spam.recommendation == "block") { %>
           <button class="btn-rc" onclick="reportSpam(<%= callInfo.from_number %>)">Mark as Spam</button>
+          <% } %>
+          <% if (customerInfo.customer) { %>
+          <div>Email: <%= customerInfo.email %></div>
+          <div>Address: <%= customerInfo.address %></div>
+          <div>SSN Number: <%= customerInfo.ssn %></div>
           <% } %>
         </div>
         <div class="col-sm-5">

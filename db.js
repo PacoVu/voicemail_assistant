@@ -12,25 +12,22 @@ const pool = new Pool({
 
 module.exports = {
   create_table: (table, tableName, callback) => {
+    console.log("table: " + table)
     if (table == "vva_users"){
-      console.log("table: " + table)
       return pool.query(
         'CREATE TABLE IF NOT EXISTS ' + tableName + '(ext_id BIGINT PRIMARY KEY, access_token TEXT NOT NULL, sub_id VARCHAR(64) NOT NULL, settings TEXT)', callback);
     }else if (table == "phonereputation"){
-      console.log("table: " + table)
       return pool.query(
-        'CREATE TABLE IF NOT EXISTS ' + tableName + '(phone_number VARCHAR(15) PRIMARY KEY, reputation_level INT DEFAULT 0, reputation_score INT DEFAULT 0, reputation_type VARCHAR(20) NULL, reputation_category VARCHAR(15) NULL, report_count INT DEFAULT 0, last_update BIGINT NOT NULL)', callback);
+        'CREATE TABLE IF NOT EXISTS ' + tableName + '(phone_number VARCHAR(15) PRIMARY KEY, level VARCHAR(12) NOT NULL, score INT DEFAULT 0, recommendation VARCHAR(20) NULL, source VARCHAR(12) NULL,last_update BIGINT NOT NULL)', callback);
     }else if (table == "subscriptionids"){
       return pool.query(
         'CREATE TABLE IF NOT EXISTS ' + tableName + '(ext_id BIGINT PRIMARY KEY, sub_id VARCHAR(64) NOT NULL, autotranscribe BOOLEAN DEFAULT false)', callback);
     }else if (table == "customer"){
-      console.log("table: " + table)
       return pool.query(
-        'CREATE TABLE IF NOT EXISTS ' + tableName + '(customer_id BIGINT PRIMARY KEY, first_name VARCHAR(20), last_name VARCHAR(20), phone_number VARCHAR(15), phone_number_type VARCHAR(10))', callback);
+        'CREATE TABLE IF NOT EXISTS ' + tableName + '(customer_id BIGINT PRIMARY KEY, first_name VARCHAR(20), last_name VARCHAR(20), phone_number VARCHAR(15), phone_number_type VARCHAR(10), email VARCHAR(48), address VARCHAR(128), ssn VARCHAR(10), level INT)', callback);
     }else if (table == "voicemail"){
-      console.log("table: " + table)
       return pool.query(
-        'CREATE TABLE IF NOT EXISTS ' + tableName + '(vm_id BIGINT PRIMARY KEY, date BIGINT NOT NULL, from_number VARCHAR(15), from_name VARCHAR(64), number_type VARCHAR(10), to_number VARCHAR(15), to_name VARCHAR(64), content_uri VARCHAR(256) NOT NULL, duration INT DEFAULT 0, transcript TEXT NOT NULL, status VARCHAR(12)  NOT NULL, confidence INT NOT NULL DEFAULT 0, phone_info TEXT, processed BOOLEAN DEFAULT false, event_type VARCHAR(12) NOT NULL, categories VARCHAR(24), assigned VARCHAR(24))', callback);
+        'CREATE TABLE IF NOT EXISTS ' + tableName + '(vm_id BIGINT PRIMARY KEY, date BIGINT NOT NULL, from_number VARCHAR(15), from_name VARCHAR(64), number_type VARCHAR(10), to_number VARCHAR(15), to_name VARCHAR(64), content_uri VARCHAR(256) NOT NULL, duration INT DEFAULT 0, transcript TEXT NOT NULL, status VARCHAR(12)  NOT NULL, confidence INT NOT NULL DEFAULT 0, phone_number_info TEXT, processed BOOLEAN DEFAULT false, event_type VARCHAR(12) NOT NULL, categories VARCHAR(24), assigned VARCHAR(24))', callback);
     }
   },
   createIndex: (query, callback) => {

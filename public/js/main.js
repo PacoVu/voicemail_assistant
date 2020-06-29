@@ -138,10 +138,7 @@ function addRow(item){
   row.append(td)
 
   // Source
-  var source = "Unknown"
-  if (item.spam.hasOwnProperty('reputation_details'))
-    if (item.spam.reputation_details.category != undefined)
-      source = item.spam.reputation_details.category
+  var source = item.reputation.source
 
   td = $("<td>", {
     class: "td-active"
@@ -174,24 +171,41 @@ function addRow(item){
   td.click( function() {
       window.location.href = createOpenItemLink(item)
   });
-  var spam = "N/A"
+  /*
+  Score	Risk Level	Recommendation
+  801-1000	high	block
+  601-800	medium-high	block
+  401-600	medium	flag
+  201-400	medium-low	allow
+  0-200	low	allow
+  */
+
   var color = "color: green"
-  if (item.spam.hasOwnProperty('reputation_level')){
-    if (item.spam.reputation_level == 1)
-      spam = "Clean"
-    else if (item.spam.reputation_level == 2){
-      spam = "Likely"
-      color = "color: orange"
-    }else if (item.spam.reputation_level == 3){
-      spam = "Highly"
-      color = "color: brown"
-    }else if (item.spam.reputation_level == 4){
+  /*
+  if (item.reputation.score >= 801){
       spam = "Risky"
       color = "color: red"
-    }
+  }else if (item.reputation.score >= 601){
+      spam = "Highly"
+      color = "color: brown"
+  }else if (item.reputation.score >= 401){
+      spam = "Likely"
+      color = "color: orange"
+  }else if (item.reputation.score >= 0){
+      spam = "Clean"
+  }
+  */
+  if (item.reputation.level == "Risky"){
+      color = "color: red"
+  }else if (item.reputation.level == "Highly"){
+      color = "color: brown"
+  }else if (item.reputation.level == "Likely"){
+      color = "color: orange"
+  }else if (item.reputation.level == "Clean"){
+      color = "color: green"
   }
   cell = $("<span>", {
-    text: spam,
+    text: item.reputation.level,
     style: color,
     });
   td.append(cell)
@@ -355,15 +369,15 @@ function formatVoicemailAge(dur){
 
 function updateVoicemailAge(){
   for (var item of voiceMailList){
-    //
-    var now = Date.now();
-    var gap = formatVoicemailAge((now - item.date)/1000)
-    var td = $("#age_" + item.id)
-    var cell = $("<span>", {
-      text: gap,
-    });
-    td.html(cell)
-    //alert(gap)
+    if (!item.processed){
+      var now = Date.now()
+      var gap = formatVoicemailAge((now - item.date)/1000)
+      var td = $("#age_" + item.id)
+      var cell = $("<span>", {
+        text: gap,
+      });
+      td.html(cell)
+    }
   }
 }
 
@@ -497,7 +511,7 @@ function submitChangeSource(item, newSource){
         if (voiceMailList[i].id == item.id){
           if (newSource == "customer"){
             voiceMailList[i].fromName = $("#first_name").val() + " " + $("#last_name").val()
-            voiceMailList[i].spam.reputation_details['category'] = "Customer"
+            voiceMailList[i].reputation.source = "Customer"
           }
           listItems()
           break
@@ -562,7 +576,7 @@ function getAudioLink(contentUri){
       alert(res.message)
   });
 }
-var spamLevel = 1
+var spamLevel = "Clean"
 function filteredBySpam(index){
   spamLevel = index
   listItems()
@@ -588,7 +602,7 @@ function listItems(){
   var category = selectedCategory //$("#category_option").val()
   $("#voicemail_items").empty()
   var level = spamLevel //parseInt($("#reputation_level").val())
-  if (level == 0){
+  if (level == "All"){
     for (var item of voiceMailList){
       if (category == "all"){
         if (agent == "all"){
@@ -642,7 +656,7 @@ function listItems(){
     for (var item of voiceMailList){
       if (category == "all"){
         if (agent == "all"){
-          if (item.spam.reputation_level == level){
+          if (item.reputation.level == level){
             if (processed == "all")
               addRow(item)
             else if (processed == "processed"){
@@ -654,7 +668,7 @@ function listItems(){
             }
           }
         }else{
-          if (item.spam.reputation_level == level){
+          if (item.reputation.level == level){
             if (processed == "all" && agent == item.assigned)
               addRow(item)
             else if (processed == "processed"){
@@ -669,7 +683,7 @@ function listItems(){
       }else{
         if (category == item.categories){
           if (agent == "all"){
-            if (item.spam.reputation_level == level){
+            if (item.reputation.level == level){
               if (processed == "all")
                 addRow(item)
               else if (processed == "processed"){
@@ -681,7 +695,7 @@ function listItems(){
               }
             }
           }else{
-            if (item.spam.reputation_level == level){
+            if (item.reputation.level == level){
               if (processed == "all" && agent == item.assigned)
                 addRow(item)
               else if (processed == "processed"){
