@@ -97,7 +97,8 @@ module.exports = {
         });
   },
   isCustomerPhoneNumber: function(customerTable, phoneNumber, callback){
-      var query = "SELECT first_name, last_name, phone_number_type FROM " + customerTable + " WHERE phone_number='" + phoneNumber +"'"
+    phoneNumber = phoneNumber.replace("+", "")
+      var query = "SELECT first_name, last_name, phone_number_type FROM " + customerTable + " WHERE phone_number='" + phoneNumber.trim() +"'"
       pgdb.read(query, (err, result) => {
           response = {}
           if (err){

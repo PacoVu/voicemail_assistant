@@ -1068,7 +1068,8 @@
       [4,	"Martin","Cooper","16504281183","landline","martin.cooper@gmail.com", "334 California Ave. San Francisco CA-92134", "803562056", 1],
       [5,	"Mike","Mahony","4085942101","landline","mike.mahony@gmail.com", "23 Embacadero Blvd. San Francisco CA-2134", "123938444", 3],
       [6, "Francisco","Rincon","16505130930", "mobile","francisco.rincon@gmail.com", "76 5th Ave. New York NY-11111", "143553290", 2],
-      [7, "Anna","Madisson","19165464387", "mobile","anna.madisson@gmail.com", "134 George Ave. Cambridge MA-31354", "424050356", 5]
+      [7, "Anna","Madisson","19165464387", "mobile","anna.madisson@gmail.com", "134 George Ave. Cambridge MA-31354", "424050356", 5],
+      [8, "Mike","Madisson","16508498071", "mobile","mike.madisson@gmail.com", "134 George Ave. Cambridge MA-31354", "342056356", 1]
     ]
 
     for (var values of data){
