@@ -22,7 +22,7 @@
     "express": "^4.15.3",
     "express-session": "^1.16.1",
     "monkeylearn": "^3.2.1",
-    "pg": "^7.10.0",
+    "pg": "^8.5.0",
     "request": "^2.88.0",
     "rev_ai": "^0.5.1",
     "ringcentral": "^3.1.1",
