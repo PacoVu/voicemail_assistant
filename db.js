@@ -1,5 +1,5 @@
 var async = require("async");
-require('dotenv').load()
+//require('dotenv').load()
 
 const { Pool, Client } = require('pg')
 const pool = new Pool({

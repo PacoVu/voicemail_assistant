@@ -8,7 +8,7 @@
   var number_analysis = require('./number_analysis_telesign')
   var content_analysis = require('./content_analysis')
   const RCPlatform = require('./platform.js')
-  require('dotenv').load()
+  //require('dotenv').load()
 
 
   var index = 0

@@ -1,5 +1,5 @@
 const User = require('./usershandler.js')
-require('dotenv').load()
+//require('dotenv').load()
 const pgdb = require('./db')
 var webhooks = require('./webhooks')
 

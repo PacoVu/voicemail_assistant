@@ -1,7 +1,7 @@
 var path = require('path')
 var util = require('util')
 
-require('dotenv').load();
+//require('dotenv').load();
 
 var express = require('express');
 var session = require('express-session');

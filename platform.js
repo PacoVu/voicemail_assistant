@@ -1,7 +1,7 @@
 var RC = require('ringcentral')
 var fs = require('fs')
 var async = require("async");
-require('dotenv').load()
+//require('dotenv').load()
 
 
 function RCPlatform(mode) {
