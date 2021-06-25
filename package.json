@@ -29,6 +29,6 @@
     "telesignsdk": "^2.2.1"
   },
   "engines": {
-    "node": "10.5.3"
+    "node": "10.16.3"
   }
 }
