@@ -111,6 +111,26 @@ var router = module.exports = {
             break
           }
         }
+        if (extId == process.env.VOICEMAIL_ASSISTANT_ID){
+          // subscribe for voicemail notification for the voicemail assistant
+          var query = "SELECT sub_id from vva_users WHERE ext_id=" + extId
+          pgdb.read(query, (err, result) => {
+              var subscriptionId = ""
+              if (!err && result.rows.length > 0){
+                subscriptionId = result.rows[0].sub_id
+              }
+              console.log("enableSubscription")
+              var platform = users[index].getPlatform()
+              if (platform != null){
+                webhooks.enableSubscription(platform, extId, subscriptionId, function(err, result){
+                  if (err){
+                    console.log("cannot start subscription.")
+                  }
+                  users[index].setSubscriptionId(result)
+                })
+              }
+          });
+        }
       }
     })
   },
@@ -127,25 +147,31 @@ var router = module.exports = {
         }
         console.log("empty access_token")
     })
-    var thisObj = this
-    var platform = users[index].getPlatform()
-    if (platform != null){
-        webhooks.deleteSubscription(platform, req.session.extensionId, function(err, result){
-          platform.logout()
-            .then(function (token) {
-              console.log("logged out")
-            })
-            .catch(function (e) {
-              console.log('Logout err ' + e.message);
-            });
+    if (req.session.extensionId == process.env.VOICEMAIL_ASSISTANT_ID){
+      var thisObj = this
+      var platform = users[index].getPlatform()
+      if (platform != null){
+          webhooks.deleteSubscription(platform, req.session.extensionId, function(err, result){
+            platform.logout()
+              .then(function (token) {
+                console.log("logged out")
+              })
+              .catch(function (e) {
+                console.log('Logout err ' + e.message);
+              });
+            users[index] = null
+            users.splice(index, 1);
+            thisObj.forceLogin(req, res)
+          })
+      }else{
           users[index] = null
           users.splice(index, 1);
           thisObj.forceLogin(req, res)
-        })
+      }
     }else{
-        users[index] = null
-        users.splice(index, 1);
-        thisObj.forceLogin(req, res)
+      users[index] = null
+      users.splice(index, 1);
+      this.forceLogin(req, res)
     }
   },
   loadAboutPage: function(req, res){
@@ -160,6 +186,17 @@ var router = module.exports = {
     var index = getUserIndex(req.session.userId)
     if (index < 0)
       return this.forceLogin(req, res)
+
+    var formattedNumber =  formatPhoneNumber(users[index].phoneNumbers[0])
+    res.render('main', {
+        userName: users[index].getUserName(),
+        phoneNumber: formattedNumber,
+        userId: req.session.userId,
+        extensionId: req.session.extensionId,
+        categoryList: users[index].settings.categories,
+        agentList: users[index].settings.agents
+      })
+    /*
     var query = "SELECT sub_id from vva_users WHERE ext_id=" + req.session.extensionId
     pgdb.read(query, (err, result) => {
         var subscriptionId = ""
@@ -169,6 +206,7 @@ var router = module.exports = {
         console.log("enableSubscription")
         var platform = users[index].getPlatform()
         if (platform != null){
+
           webhooks.enableSubscription(platform, req.session.extensionId, subscriptionId, function(err, result){
             if (err){
               console.log("cannot start subscription.")
@@ -187,7 +225,9 @@ var router = module.exports = {
         }else{
           return this.forceLogin(req, res)
         }
+
     });
+    */
   },
   loadProcessItemPage: function(req, res){
     var index = getUserIndex(req.session.userId)

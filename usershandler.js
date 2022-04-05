@@ -497,7 +497,7 @@
       this.newData = false
       var item = {}
       item['event_type'] = "VoiceMail"
-      //console.log(JSON.stringify(body))
+      console.log(JSON.stringify(body))
       if (body.from.hasOwnProperty("phoneNumber")){
         item['fromNumber'] = body.from.phoneNumber
         if (body.from.hasOwnProperty('name'))

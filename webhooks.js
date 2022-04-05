@@ -35,7 +35,7 @@ module.exports = {
 
 function startWebhookSubscription(platform, extId, callback) {
   var _eventFilters = [
-    '/restapi/v1.0/account/~/extension/~/voicemail',
+    `/restapi/v1.0/account/~/extension/${process.env.VOICEMAIL_ASSISTANT_ID}/voicemail`
   ];
   platform.post('/subscription',
       {
